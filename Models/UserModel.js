@@ -1,0 +1,103 @@
+const mongoose = require("mongoose");
+const CalendarModel = require("./CalendarModel");
+const User = require("./UserModel");
+
+const userSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  approvedEmailList: [{ type: String }],
+  password: {
+    type: String,
+    required: true,
+  },
+  ownedCalendar: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Calendars",
+  },
+  accessibleCalendars: [
+    { type: mongoose.Schema.Types.ObjectId, ref: "Calendars" },
+  ],
+});
+
+userSchema.methods.addOwnedCalendar = async function () {
+  try {
+    const calendar = await CalendarModel.create({
+      name: `My Calendar: ${this.email}`,
+    });
+    this.ownedCalendar = calendar._id;
+    await this.save();
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+userSchema.userSchema.methods.addAccessibleCalendar = async function (
+  calendarId
+) {
+  try {
+    this.accessibleCalendars.push(calendarId);
+    await this.save();
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+userSchema.methods.removeAccessibleCalendar = async function (calendarId) {
+  try {
+    this.accessibleCalendars = this.accessibleCalendars.filter(
+      (id) => id.toString() !== calendarId.toString()
+    );
+    await this.save();
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+userSchema.methods.addApprovedEmail = async function (email) {
+  try {
+    this.approvedEmailList.push(email);
+    await this.save();
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+userSchema.methods.getAllAccessibleCalendars = async function () {
+  try {
+    const calendars = await CalendarModel.find({
+      _id: { $in: this.accessibleCalendars },
+    });
+    return calendars;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+userSchema.post("save", async function () {
+  try {
+    if (!this.ownedCalendar) {
+      await this.addOwnedCalendar();
+    }
+    if (this.isModified("email")) {
+      const otherUsers = await User.find({ approvedEmailList: this.email });
+      for (let otherUser of otherUsers) {
+        await this.addAccessibleCalendar(otherUser.ownedCalendar._id);
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+});
+
+const UserModel = mongoose.model("Users", userSchema);
+
+module.exports = UserModel;
