@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema({
   accessibleCalendars: [
     { type: mongoose.Schema.Types.ObjectId, ref: "Calendars", default: [] },
   ],
+  refreshToken: {
+    type: String,
+    default: "",
+  },
 });
 
 userSchema.methods.addOwnedCalendar = async function () {
