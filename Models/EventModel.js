@@ -13,18 +13,17 @@ const eventSchema = new mongoose.Schema({
   description: {
     type: String,
     required: false,
+    default: "",
   },
 });
 
 eventSchema.statics.createEvent = async function (name, date, description) {
   try {
-    const event = new this({
+    return await this.create({
       name,
       date,
       description,
     });
-
-    await event.save();
   } catch (error) {
     console.error("Error creating an event:", error);
     throw error;

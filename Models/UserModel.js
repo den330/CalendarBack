@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const CalendarModel = require("./CalendarModel");
 const User = require("./UserModel");
+const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -18,7 +19,7 @@ const userSchema = new mongoose.Schema({
     ref: "Calendars",
   },
   accessibleCalendars: [
-    { type: mongoose.Schema.Types.ObjectId, ref: "Calendars" },
+    { type: mongoose.Schema.Types.ObjectId, ref: "Calendars", default: [] },
   ],
 });
 
@@ -82,6 +83,7 @@ userSchema.methods.getAllAccessibleCalendars = async function () {
 };
 
 userSchema.post("save", async function () {
+  console.log("user save post called");
   try {
     if (!this.ownedCalendar) {
       await this.addOwnedCalendar();
@@ -97,6 +99,17 @@ userSchema.post("save", async function () {
     throw error;
   }
 });
+
+userSchema.statics.createUser = async function (email, password) {
+  try {
+    const encryptedPassword = await bcrypt.hash(password, 10);
+    const newUser = await this.create({ email, password: encryptedPassword });
+    return newUser;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
 
 const UserModel = mongoose.model("Users", userSchema);
 

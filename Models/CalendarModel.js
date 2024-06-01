@@ -5,7 +5,9 @@ const calendarSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  events: [{ type: mongoose.Schema.Types.ObjectId, ref: "Events" }],
+  events: [
+    { type: mongoose.Schema.Types.ObjectId, ref: "Events", default: [] },
+  ],
 });
 
 calendarSchema.methods.addEvent = async function (event) {
@@ -36,6 +38,17 @@ calendarSchema.methods.removeAllEvents = async function () {
     await this.save();
   } catch (error) {
     console.log(error);
+    throw error;
+  }
+};
+
+calendarSchema.statics.createCalendar = async function (name) {
+  try {
+    return await this.create({
+      name,
+    });
+  } catch (error) {
+    console.error("Error creating a calendar:", error);
     throw error;
   }
 };
