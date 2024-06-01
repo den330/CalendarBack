@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  approvedEmailList: [{ type: String }],
+  approvedEmailList: [{ type: String, default: [] }],
   password: {
     type: String,
     required: true,
