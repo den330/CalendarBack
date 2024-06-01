@@ -40,9 +40,7 @@ userSchema.methods.addOwnedCalendar = async function () {
   }
 };
 
-userSchema.userSchema.methods.addAccessibleCalendar = async function (
-  calendarId
-) {
+userSchema.methods.addAccessibleCalendar = async function (calendarId) {
   try {
     this.accessibleCalendars.push(calendarId);
     await this.save();
