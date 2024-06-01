@@ -102,6 +102,12 @@ userSchema.post("save", async function () {
 
 userSchema.statics.createUser = async function (email, password) {
   try {
+    if (!email || !password) {
+      throw new Error("Email and password are required");
+    }
+    if (await this.findOne({ email })) {
+      throw new Error("User already exists");
+    }
     const encryptedPassword = await bcrypt.hash(password, 10);
     const newUser = await this.create({ email, password: encryptedPassword });
     return newUser;
