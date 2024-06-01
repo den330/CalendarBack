@@ -63,6 +63,26 @@ userSchema.methods.removeAccessibleCalendar = async function (calendarId) {
 userSchema.methods.addApprovedEmail = async function (email) {
   try {
     this.approvedEmailList.push(email);
+    await User.updateMany(
+      { email: email },
+      { $push: { accessibleCalendars: this.ownedCalendar } }
+    );
+    await this.save();
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+userSchema.methods.removeApprovedEmail = async function (email) {
+  try {
+    this.approvedEmailList = this.approvedEmailList.filter(
+      (approvedEmail) => approvedEmail !== email
+    );
+    await User.updateMany(
+      { email: email },
+      { $pull: { accessibleCalendars: this.ownedCalendar } }
+    );
     await this.save();
   } catch (error) {
     console.log(error);
