@@ -65,14 +65,6 @@ eventSchema.statics.deleteEventById = async function (eventId) {
   }
 };
 
-eventSchema.statics.deleteAllEvents = async function () {
-  try {
-    await this.deleteMany({});
-  } catch (error) {
-    console.error("Error deleting all events:", error);
-    throw error;
-  }
-};
 const EventModel = mongoose.model("Events", eventSchema);
 
 module.exports = EventModel;
