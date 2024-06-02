@@ -53,5 +53,14 @@ calendarSchema.statics.createCalendar = async function (name) {
   }
 };
 
+calendarSchema.statics.getCalendarById = async function (calendarId) {
+  try {
+    return await this.findById(calendarId);
+  } catch (error) {
+    console.error("Error getting a calendar:", error);
+    throw error;
+  }
+};
+
 const CalendarModel = mongoose.model("Calendars", calendarSchema);
 module.exports = CalendarModel;

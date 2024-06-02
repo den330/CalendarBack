@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const CalendarModel = require("./CalendarModel");
-const User = require("./UserModel");
 const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema({
@@ -65,7 +64,7 @@ userSchema.methods.removeAccessibleCalendar = async function (calendarId) {
 userSchema.methods.addApprovedEmail = async function (email) {
   try {
     this.approvedEmailList.push(email);
-    await User.updateMany(
+    await this.model("User").updateMany(
       { email: email },
       { $push: { accessibleCalendars: this.ownedCalendar } }
     );
@@ -81,7 +80,7 @@ userSchema.methods.removeApprovedEmail = async function (email) {
     this.approvedEmailList = this.approvedEmailList.filter(
       (approvedEmail) => approvedEmail !== email
     );
-    await User.updateMany(
+    await this.model("User").updateMany(
       { email: email },
       { $pull: { accessibleCalendars: this.ownedCalendar } }
     );
@@ -104,23 +103,15 @@ userSchema.methods.getAllAccessibleCalendars = async function () {
   }
 };
 
-userSchema.post("save", async function () {
-  console.log("user save post called");
+userSchema.methods.getOwnCalendar = async function () {
   try {
-    if (!this.ownedCalendar) {
-      await this.addOwnedCalendar();
-    }
-    if (this.isModified("email")) {
-      const otherUsers = await User.find({ approvedEmailList: this.email });
-      for (let otherUser of otherUsers) {
-        await this.addAccessibleCalendar(otherUser.ownedCalendar._id);
-      }
-    }
+    const calendar = await CalendarModel.findById(this.ownedCalendar);
+    return calendar;
   } catch (error) {
     console.log(error);
     throw error;
   }
-});
+};
 
 userSchema.statics.createUser = async function (email, password) {
   try {
@@ -132,6 +123,15 @@ userSchema.statics.createUser = async function (email, password) {
     }
     const encryptedPassword = await bcrypt.hash(password, 10);
     const newUser = await this.create({ email, password: encryptedPassword });
+    if (!newUser.ownedCalendar) {
+      await newUser.addOwnedCalendar();
+    }
+    const otherUsers = await this.model("User").find({
+      approvedEmailList: newUser.email,
+    });
+    for (let otherUser of otherUsers) {
+      await newUser.addAccessibleCalendar(otherUser.ownedCalendar._id);
+    }
     return newUser;
   } catch (error) {
     console.log(error);
@@ -156,6 +156,14 @@ userSchema.statics.login = async function (email, password) {
   }
 };
 
-const UserModel = mongoose.model("Users", userSchema);
+userSchema.statics.getUserById = async function (userId) {
+  try {
+    return await this.findById(userId);
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
 
+const UserModel = mongoose.model("Users", userSchema);
 module.exports = UserModel;

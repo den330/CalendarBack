@@ -1,6 +1,7 @@
-const UserModel = require("../models/User");
+const UserModel = require("../Models/UserModel");
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const loginController = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
@@ -15,7 +16,7 @@ const loginController = asyncHandler(async (req, res) => {
     process.env.REFRESH_TOKEN_SECRET,
     { expiresIn: "30d" }
   );
-  user.refreshToken = refreshToken;
+  user.refreshToken = bcrypt.hashSync(refreshToken, 10);
   await user.save();
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
