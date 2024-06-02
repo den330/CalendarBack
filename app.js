@@ -7,6 +7,7 @@ const signupRoute = require("./Routes/SignUpRoute");
 const loginRoute = require("./Routes/LoginRoute");
 const userRoute = require("./Routes/UserRoute");
 const calendarRoute = require("./Routes/CalendarRoute");
+const verifyAndUpdateJWT = require("./Middleware/VerifyAndUpdateJWT");
 
 mongoose.connect(`${process.env.dbUrl}`);
 const db = mongoose.connection;
@@ -20,6 +21,8 @@ app.use(morgan("dev"));
 
 app.use("/signup", signupRoute);
 app.use("/login", loginRoute);
+
+app.use(verifyAndUpdateJWT);
 app.use("/user", userRoute);
 app.use("/calendar", calendarRoute);
 app.use((err, req, res, next) => {
