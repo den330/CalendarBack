@@ -15,6 +15,8 @@ const loginController = asyncHandler(async (req, res) => {
     process.env.REFRESH_TOKEN_SECRET,
     { expiresIn: "30d" }
   );
+  user.refreshToken = refreshToken;
+  await user.save();
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     sameSite: "lax",
