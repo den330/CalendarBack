@@ -163,17 +163,9 @@ userSchema.statics.login = async function (email, password) {
   }
 };
 
-userSchema.statics.findMatchingRefreshToken = async function (rawRefreshToken) {
+userSchema.statics.findMatchingRefreshToken = async function (refreshToken) {
   try {
-    const users = await this.find({ refreshToken: { $ne: null } });
-
-    for (const user of users) {
-      const match = await bcrypt.compare(rawRefreshToken, user.refreshToken);
-      if (match) {
-        return user;
-      }
-    }
-    return null;
+    return await this.findOne({ refreshToken });
   } catch (error) {
     console.log(error);
     throw error;

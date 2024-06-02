@@ -7,22 +7,22 @@ const loginController = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const user = await UserModel.login(email, password);
   const accessToken = jwt.sign(
-    { id: user._id },
+    { id: user._id.toString() },
     process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: "15m" }
   );
   const refreshToken = jwt.sign(
-    { id: user._id },
+    { id: user._id.toString() },
     process.env.REFRESH_TOKEN_SECRET,
     { expiresIn: "30d" }
   );
-  user.refreshToken = await bcrypt.hash(refreshToken, 10);
+  user.refreshToken = refreshToken;
   await user.save();
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    path: "/refreshToken",
+    path: "/",
     maxAge: 30 * 24 * 60 * 60 * 1000,
   });
   res.cookie("accessToken", accessToken, {
