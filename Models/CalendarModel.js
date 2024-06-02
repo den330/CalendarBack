@@ -10,32 +10,49 @@ const calendarSchema = new mongoose.Schema({
   ],
 });
 
-calendarSchema.methods.addEvent = async function (event) {
+calendarSchema.statics.addEvent = async function (
+  calendar_id,
+  name,
+  date,
+  description
+) {
   try {
-    this.events.push(event._id);
-    await this.save();
+    const event = await this.model("Events").createEvent(
+      name,
+      date,
+      description
+    );
+    const calendar = await this.findById(calendar_id);
+    calendar.events.push(event._id);
+    await calendar.save();
   } catch (error) {
     console.log(error);
     throw error;
   }
 };
 
-calendarSchema.methods.removeEvent = async function (eventId) {
+calendarSchema.statics.removeEvent = async function (eventId, calendarId) {
   try {
-    this.events = this.events.filter(
+    await this.model("Events").deleteEventById(eventId);
+    const calendar = await this.findById(calendarId);
+    calendar.events = calendar.events.filter(
       (id) => id.toString() !== eventId.toString()
     );
-    await this.save();
+    await calendar.save();
   } catch (error) {
     console.log(error);
     throw error;
   }
 };
 
-calendarSchema.methods.removeAllEvents = async function () {
+calendarSchema.statics.removeAllEvents = async function (calendarId) {
   try {
-    this.events = [];
-    await this.save();
+    const calendar = await this.findById(calendarId);
+    for (let eventId of calendar.events) {
+      await this.model("Events").deleteEventById(eventId);
+    }
+    calendar.events = [];
+    await calendar.save();
   } catch (error) {
     console.log(error);
     throw error;

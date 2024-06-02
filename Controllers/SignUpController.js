@@ -3,7 +3,7 @@ const UserModel = require("../Models/UserModel");
 
 const signUpController = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  await UserModel.createuser(email, password);
+  await UserModel.createUser(email, password);
   res.status(201).json({ message: "User created" });
 });
 

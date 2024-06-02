@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const CalendarModel = require("./CalendarModel");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -26,76 +26,80 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-userSchema.methods.addOwnedCalendar = async function () {
+userSchema.statics.addOwnedCalendar = async function (userId, session) {
   try {
-    const calendar = await CalendarModel.create({
-      name: `My Calendar: ${this.email}`,
+    const calendar = await this.model("Calendars").createCalendar(
+      "My Calendar",
+      { session: session }
+    );
+    await this.findByIdAndUpdate(
+      userId,
+      { ownedCalendar: calendar._id },
+      { session: session }
+    );
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+userSchema.statics.addAccessibleCalendar = async function (userId, calendarId) {
+  try {
+    await this.findByIdAndUpdate(userId, {
+      $push: { accessibleCalendars: calendarId },
     });
-    this.ownedCalendar = calendar._id;
-    await this.save();
   } catch (error) {
     console.log(error);
     throw error;
   }
 };
 
-userSchema.methods.addAccessibleCalendar = async function (calendarId) {
+userSchema.statics.removeAccessibleCalendar = async function (
+  userId,
+  calendarId
+) {
   try {
-    this.accessibleCalendars.push(calendarId);
-    await this.save();
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
-};
-
-userSchema.methods.removeAccessibleCalendar = async function (calendarId) {
-  try {
-    this.accessibleCalendars = this.accessibleCalendars.filter(
-      (id) => id.toString() !== calendarId.toString()
-    );
-    await this.save();
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
-};
-
-userSchema.methods.addApprovedEmail = async function (email) {
-  try {
-    this.approvedEmailList.push(email);
-    await this.model("User").updateMany(
-      { email: email },
-      { $push: { accessibleCalendars: this.ownedCalendar } }
-    );
-    await this.save();
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
-};
-
-userSchema.methods.removeApprovedEmail = async function (email) {
-  try {
-    this.approvedEmailList = this.approvedEmailList.filter(
-      (approvedEmail) => approvedEmail !== email
-    );
-    await this.model("User").updateMany(
-      { email: email },
-      { $pull: { accessibleCalendars: this.ownedCalendar } }
-    );
-    await this.save();
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
-};
-
-userSchema.methods.getAllAccessibleCalendars = async function () {
-  try {
-    const calendars = await CalendarModel.find({
-      _id: { $in: this.accessibleCalendars },
+    await this.findByIdAndUpdate(userId, {
+      $pull: { accessibleCalendars: calendarId },
     });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+userSchema.statics.addApprovedEmail = async function (userId, email) {
+  try {
+    await this.findByIdAndUpdate(userId, {
+      $push: { approvedEmailList: email },
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+userSchema.statics.removeApprovedEmail = async function (userId, email) {
+  try {
+    await this.findByIdAndUpdate(userId, {
+      $pull: { approvedEmailList: email },
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+userSchema.statics.getAllAccessibleCalendars = async function (userId) {
+  try {
+    const user = await this.findById(userId);
+    const calendars = [];
+    for (let calendarId of user.accessibleCalendars) {
+      const calendar = await this.model("Calendars").getCalendarById(
+        calendarId
+      );
+      calendars.push(calendar);
+    }
     return calendars;
   } catch (error) {
     console.log(error);
@@ -103,10 +107,10 @@ userSchema.methods.getAllAccessibleCalendars = async function () {
   }
 };
 
-userSchema.methods.getOwnCalendar = async function () {
+userSchema.statics.getOwnCalendar = async function (userId) {
   try {
-    const calendar = await CalendarModel.findById(this.ownedCalendar);
-    return calendar;
+    const user = await this.findById(userId);
+    return await this.model("Calendars").getCalendarById(user.ownedCalendar);
   } catch (error) {
     console.log(error);
     throw error;
@@ -114,28 +118,32 @@ userSchema.methods.getOwnCalendar = async function () {
 };
 
 userSchema.statics.createUser = async function (email, password) {
+  const session = await mongoose.startSession();
   try {
     if (!email || !password) {
       throw new Error("Email and password are required");
     }
-    if (await this.findOne({ email })) {
+    const existingUser = await this.findOne({ email });
+    if (existingUser) {
       throw new Error("User already exists");
     }
+
+    session.startTransaction();
     const encryptedPassword = await bcrypt.hash(password, 10);
-    const newUser = await this.create({ email, password: encryptedPassword });
-    if (!newUser.ownedCalendar) {
-      await newUser.addOwnedCalendar();
-    }
-    const otherUsers = await this.model("User").find({
-      approvedEmailList: newUser.email,
-    });
-    for (let otherUser of otherUsers) {
-      await newUser.addAccessibleCalendar(otherUser.ownedCalendar._id);
-    }
+    const newUser = await this.create(
+      [{ email, password: encryptedPassword }],
+      { session: session }
+    );
+
+    await this.addOwnedCalendar(newUser._id, session);
+
+    await session.commitTransaction();
     return newUser;
   } catch (error) {
-    console.log(error);
+    await session.abortTransaction();
     throw error;
+  } finally {
+    session.endSession();
   }
 };
 
@@ -150,6 +158,23 @@ userSchema.statics.login = async function (email, password) {
       throw new Error("Password is incorrect");
     }
     return user;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+userSchema.statics.findMatchingRefreshToken = async function (rawRefreshToken) {
+  try {
+    const users = await this.find({ refreshToken: { $ne: null } });
+
+    for (const user of users) {
+      const match = await bcrypt.compare(rawRefreshToken, user.refreshToken);
+      if (match) {
+        return user;
+      }
+    }
+    return null;
   } catch (error) {
     console.log(error);
     throw error;

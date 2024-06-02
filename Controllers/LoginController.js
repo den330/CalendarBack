@@ -16,7 +16,7 @@ const loginController = asyncHandler(async (req, res) => {
     process.env.REFRESH_TOKEN_SECRET,
     { expiresIn: "30d" }
   );
-  user.refreshToken = bcrypt.hashSync(refreshToken, 10);
+  user.refreshToken = await bcrypt.hash(refreshToken, 10);
   await user.save();
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
