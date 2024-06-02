@@ -139,6 +139,23 @@ userSchema.statics.createUser = async function (email, password) {
   }
 };
 
+userSchema.statics.login = async function (email, password) {
+  try {
+    const user = await this.findOne({ email });
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      throw new Error("Password is incorrect");
+    }
+    return user;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 const UserModel = mongoose.model("Users", userSchema);
 
 module.exports = UserModel;

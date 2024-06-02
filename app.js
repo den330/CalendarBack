@@ -20,9 +20,11 @@ app.use("/signup", signupRoute);
 app.use("/login", loginRoute);
 app.use("/user", userRoute);
 app.use("/calendar", calendarRoute);
-
-app.listen(3000);
+app.use((err, req, res, next) => {
+  res.status(500).json({ message: err.message });
+});
 
 db.once("open", () => {
   console.log("db connected");
+  app.listen(3000);
 });
