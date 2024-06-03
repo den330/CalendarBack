@@ -22,6 +22,7 @@ app.use(morgan("dev"));
 app.use("/signup", signupRoute);
 app.use("/login", loginRoute);
 
+app.use(verifyAndUpdateJWT);
 app.use("/user", userRoute);
 app.use("/calendar", calendarRoute);
 app.use((err, req, res, next) => {

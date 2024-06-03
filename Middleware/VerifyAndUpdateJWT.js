@@ -62,3 +62,5 @@ const verifyAndUpdateJWTIfNeeded = asyncHandler(async (req, res, next) => {
     }
   }
 });
+
+module.exports = verifyAndUpdateJWTIfNeeded;
