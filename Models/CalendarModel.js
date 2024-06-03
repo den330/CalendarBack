@@ -6,7 +6,7 @@ const calendarSchema = new mongoose.Schema({
     required: true,
   },
   events: [
-    { type: mongoose.Schema.Types.ObjectId, ref: "Events", default: [] },
+    { type: mongoose.Schema.Types.ObjectId, ref: "events", default: [] },
   ],
 });
 
@@ -17,7 +17,7 @@ calendarSchema.statics.addEvent = async function (
   description
 ) {
   try {
-    const event = await this.model("Events").createEvent(
+    const event = await this.model("events").createEvent(
       name,
       date,
       description
@@ -33,7 +33,7 @@ calendarSchema.statics.addEvent = async function (
 
 calendarSchema.statics.removeEvent = async function (eventId, calendarId) {
   try {
-    await this.model("Events").deleteEventById(eventId);
+    await this.model("events").deleteEventById(eventId);
     const calendar = await this.findById(calendarId);
     calendar.events = calendar.events.filter(
       (id) => id.toString() !== eventId.toString()
@@ -49,7 +49,7 @@ calendarSchema.statics.removeAllEvents = async function (calendarId) {
   try {
     const calendar = await this.findById(calendarId);
     for (let eventId of calendar.events) {
-      await this.model("Events").deleteEventById(eventId);
+      await this.model("events").deleteEventById(eventId);
     }
     calendar.events = [];
     await calendar.save();
@@ -79,5 +79,5 @@ calendarSchema.statics.getCalendarById = async function (calendarId) {
   }
 };
 
-const CalendarModel = mongoose.model("Calendars", calendarSchema);
+const CalendarModel = mongoose.model("calendars", calendarSchema);
 module.exports = CalendarModel;

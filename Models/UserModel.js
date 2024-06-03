@@ -14,10 +14,10 @@ const userSchema = new mongoose.Schema({
   },
   ownedCalendar: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Calendars",
+    ref: "calendars",
   },
   accessibleCalendars: [
-    { type: mongoose.Schema.Types.ObjectId, ref: "Calendars", default: [] },
+    { type: mongoose.Schema.Types.ObjectId, ref: "calendars", default: [] },
   ],
   refreshToken: {
     type: String,
@@ -27,11 +27,11 @@ const userSchema = new mongoose.Schema({
 
 userSchema.statics.addOwnedCalendar = async function (userId, session) {
   try {
-    const calendar = await this.model("Calendars").createCalendar(
+    const calendar = await this.model("calendars").createCalendar(
       "My Calendar",
       { session: session }
     );
-    await this.findByIdAndUpdate(
+    const result = await this.findByIdAndUpdate(
       userId,
       { ownedCalendar: calendar._id },
       { session: session }
@@ -94,7 +94,7 @@ userSchema.statics.getAllAccessibleCalendars = async function (userId) {
     const user = await this.findById(userId);
     const calendars = [];
     for (let calendarId of user.accessibleCalendars) {
-      const calendar = await this.model("Calendars").getCalendarById(
+      const calendar = await this.model("calendars").getCalendarById(
         calendarId
       );
       calendars.push(calendar);
@@ -109,7 +109,7 @@ userSchema.statics.getAllAccessibleCalendars = async function (userId) {
 userSchema.statics.getOwnCalendar = async function (userId) {
   try {
     const user = await this.findById(userId);
-    return await this.model("Calendars").getCalendarById(user.ownedCalendar);
+    return await this.model("calendars").getCalendarById(user.ownedCalendar);
   } catch (error) {
     console.log(error);
     throw error;
@@ -129,11 +129,11 @@ userSchema.statics.createUser = async function (email, password) {
 
     session.startTransaction();
     const encryptedPassword = await bcrypt.hash(password, 10);
-    const newUser = await this.create(
-      [{ email, password: encryptedPassword }],
+    const newUserArr = await this.create(
+      [{ email: email, password: encryptedPassword }],
       { session: session }
     );
-
+    const newUser = newUserArr[0];
     await this.addOwnedCalendar(newUser._id, session);
 
     await session.commitTransaction();
@@ -181,5 +181,5 @@ userSchema.statics.getUserById = async function (userId) {
   }
 };
 
-const UserModel = mongoose.model("Users", userSchema);
+const UserModel = mongoose.model("users", userSchema);
 module.exports = UserModel;

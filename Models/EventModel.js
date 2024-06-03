@@ -65,6 +65,6 @@ eventSchema.statics.deleteEventById = async function (eventId) {
   }
 };
 
-const EventModel = mongoose.model("Events", eventSchema);
+const EventModel = mongoose.model("events", eventSchema);
 
 module.exports = EventModel;
