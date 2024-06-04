@@ -27,8 +27,10 @@ const userSchema = new mongoose.Schema({
 
 userSchema.statics.addOwnedCalendar = async function (userId, session) {
   try {
+    const user = await this.findById(userId).session(session);
+    const userEmail = user.email;
     const calendar = await this.model("calendars").createCalendar(
-      "My Calendar",
+      `${userEmail}'s calendar`,
       { session: session }
     );
     const result = await this.findByIdAndUpdate(
@@ -69,9 +71,17 @@ userSchema.statics.removeAccessibleCalendar = async function (
 
 userSchema.statics.addApprovedEmail = async function (userId, email) {
   try {
-    await this.findByIdAndUpdate(userId, {
-      $push: { approvedEmailList: email },
-    });
+    const user = await this.findById(userId);
+    if (user.approvedEmailList.includes(email)) {
+      throw new Error("Email already approved");
+    }
+    user.approvedEmailList.push(email);
+    await user.save();
+    const calendarId = user.ownedCalendar._id;
+    await this.findOneAndUpdate(
+      { email: email },
+      { $push: { accessibleCalendars: calendarId } }
+    );
   } catch (error) {
     console.log(error);
     throw error;
@@ -80,9 +90,16 @@ userSchema.statics.addApprovedEmail = async function (userId, email) {
 
 userSchema.statics.removeApprovedEmail = async function (userId, email) {
   try {
-    await this.findByIdAndUpdate(userId, {
-      $pull: { approvedEmailList: email },
-    });
+    const user = await this.findById(userId);
+    user.approvedEmailList = user.approvedEmailList.filter(
+      (approvedEmail) => approvedEmail !== email
+    );
+    await user.save();
+    const calendarId = user.ownedCalendar._id;
+    await this.findOneAndUpdate(
+      { email: email },
+      { $pull: { accessibleCalendars: calendarId } }
+    );
   } catch (error) {
     console.log(error);
     throw error;
@@ -134,6 +151,16 @@ userSchema.statics.createUser = async function (email, password) {
       { session: session }
     );
     const newUser = newUserArr[0];
+    const users = await this.find({ approvedEmailList: email }).session(
+      session
+    );
+    let idList = [];
+    for (let user of users) {
+      const ownCalendarId = user.ownedCalendar._id;
+      idList.push(ownCalendarId);
+    }
+    newUser.accessibleCalendars = idList;
+    await newUser.save({ session: session });
     await this.addOwnedCalendar(newUser._id, session);
 
     await session.commitTransaction();

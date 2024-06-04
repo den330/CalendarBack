@@ -5,6 +5,7 @@ const calendarSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
   events: [
     { type: mongoose.Schema.Types.ObjectId, ref: "events", default: [] },
   ],
@@ -13,12 +14,14 @@ const calendarSchema = new mongoose.Schema({
 calendarSchema.statics.addEvent = async function (
   calendar_id,
   name,
+  creatorId,
   date,
   description
 ) {
   try {
     const event = await this.model("events").createEvent(
       name,
+      creatorId,
       date,
       description
     );
@@ -75,6 +78,21 @@ calendarSchema.statics.getCalendarById = async function (calendarId) {
     return await this.findById(calendarId);
   } catch (error) {
     console.error("Error getting a calendar:", error);
+    throw error;
+  }
+};
+
+calendarSchema.statics.getEvents = async function (calendarId) {
+  try {
+    const calendar = await this.findById(calendarId);
+    const events = [];
+    for (let eventId of calendar.events) {
+      const event = await this.model("events").getEventById(eventId);
+      events.push(event);
+    }
+    return events;
+  } catch {
+    console.error("Error getting events:", error);
     throw error;
   }
 };

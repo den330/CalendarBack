@@ -32,7 +32,7 @@ const loginController = asyncHandler(async (req, res) => {
     path: "/",
     maxAge: 15 * 60 * 1000,
   });
-  res.status(200).json({ message: "User logged in" });
+  res.status(200).json({ message: "User logged in", email: email });
 });
 
 module.exports = loginController;

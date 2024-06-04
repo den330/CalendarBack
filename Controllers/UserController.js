@@ -1,7 +1,13 @@
-function getCurrentUserController(req, res, next) {
-  res.send("get current user controller");
-}
+const asyncHandler = require("express-async-handler");
+const UserModel = require("../Models/UserModel");
 
-module.exports = {
-  getCurrentUserController,
-};
+const addEmailController = asyncHandler(async (req, res) => {
+  {
+    const { email } = req.body;
+    const userId = req.userId;
+    await UserModel.addApprovedEmail(userId, email);
+    res.status(201).json({ message: "Email added" });
+  }
+});
+
+module.exports = { addEmailController };
