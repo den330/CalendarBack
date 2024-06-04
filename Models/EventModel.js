@@ -20,7 +20,7 @@ const eventSchema = new mongoose.Schema({
   },
 });
 
-eventsSchema.statics.updateEvent = async function (
+eventSchema.statics.updateEvent = async function (
   eventId,
   name,
   date,

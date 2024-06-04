@@ -10,6 +10,9 @@ const loginRoute = require("./Routes/LoginRoute");
 const userRoute = require("./Routes/UserRoute");
 const calendarRoute = require("./Routes/CalendarRoute");
 const verifyAndUpdateJWT = require("./Middleware/VerifyAndUpdateJWT");
+require("./Models/UserModel");
+require("./Models/CalendarModel");
+require("./Models/EventModel");
 
 mongoose.connect(`${process.env.dbUrl}`);
 const db = mongoose.connection;
