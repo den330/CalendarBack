@@ -1,5 +1,13 @@
+const allowedOrigins = require("./AllowedOrigins");
+
 const corsOptions = {
-  origin: "http://localhost:3000",
+  origin: (origin, callback) => {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],
 };
