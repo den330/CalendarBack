@@ -1,5 +1,7 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
+const cors = require("cors");
+const corsOptions = require("./Configs/CorsOptions");
 const express = require("express");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
@@ -18,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan("dev"));
-
+app.use(cors(corsOptions));
 app.use("/signup", signupRoute);
 app.use("/login", loginRoute);
 

@@ -38,7 +38,7 @@ const verifyAndUpdateJWTIfNeeded = asyncHandler(async (req, res, next) => {
         process.env.REFRESH_TOKEN_SECRET,
         { expiresIn: "30d" }
       );
-      user.refreshToken = refreshToken;
+      user.refreshToken = newRefreshToken;
       await user.save();
       res.cookie("refreshToken", newRefreshToken, {
         httpOnly: true,

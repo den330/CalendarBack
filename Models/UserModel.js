@@ -29,8 +29,10 @@ userSchema.statics.addOwnedCalendar = async function (userId, session) {
   try {
     const user = await this.findById(userId).session(session);
     const userEmail = user.email;
+    const emailPars = userEmail.split("@");
+    const firstPart = emailPars[0];
     const calendar = await this.model("calendars").createCalendar(
-      `${userEmail}'s calendar`,
+      `${firstPart}'s calendar`,
       { session: session }
     );
     const result = await this.findByIdAndUpdate(
@@ -74,6 +76,9 @@ userSchema.statics.addApprovedEmail = async function (userId, email) {
     const user = await this.findById(userId);
     if (user.approvedEmailList.includes(email)) {
       throw new Error("Email already approved");
+    }
+    if (user.email === email) {
+      throw new Error("Cannot approve own email");
     }
     user.approvedEmailList.push(email);
     await user.save();
