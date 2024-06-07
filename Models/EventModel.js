@@ -9,7 +9,7 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  date: {
+  start: {
     type: Date,
     required: true,
   },
@@ -23,13 +23,13 @@ const eventSchema = new mongoose.Schema({
 eventSchema.statics.updateEvent = async function (
   eventId,
   name,
-  date,
+  start,
   description
 ) {
   try {
     await this.findByIdAndUpdate(eventId, {
       name,
-      date,
+      start,
       description,
     });
   } catch (error) {
@@ -41,14 +41,14 @@ eventSchema.statics.updateEvent = async function (
 eventSchema.statics.createEvent = async function (
   name,
   creatorId,
-  date,
+  start,
   description
 ) {
   try {
     return await this.create({
       name,
       creatorId,
-      date,
+      start,
       description,
     });
   } catch (error) {

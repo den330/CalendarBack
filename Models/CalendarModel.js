@@ -15,14 +15,14 @@ calendarSchema.statics.addEvent = async function (
   calendar_id,
   name,
   creatorId,
-  date,
+  start,
   description
 ) {
   try {
     const event = await this.model("events").createEvent(
       name,
       creatorId,
-      date,
+      start,
       description
     );
     const calendar = await this.findById(calendar_id);
@@ -42,6 +42,20 @@ calendarSchema.statics.removeEvent = async function (eventId, calendarId) {
       (id) => id.toString() !== eventId.toString()
     );
     await calendar.save();
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+calendarSchema.statics.updateEvent = async function (
+  eventId,
+  name,
+  start,
+  description
+) {
+  try {
+    await this.model("events").updateEvent(eventId, name, start, description);
   } catch (error) {
     console.log(error);
     throw error;
