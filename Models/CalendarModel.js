@@ -12,7 +12,9 @@ const calendarSchema = new mongoose.Schema({
 });
 
 calendarSchema.statics.addEvent = async function (
+  _id,
   calendar_id,
+  eventId,
   title,
   creatorId,
   start,
@@ -20,6 +22,8 @@ calendarSchema.statics.addEvent = async function (
 ) {
   try {
     const event = await this.model("events").createEvent(
+      _id,
+      eventId,
       title,
       creatorId,
       start,

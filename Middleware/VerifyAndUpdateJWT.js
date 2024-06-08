@@ -52,7 +52,7 @@ const verifyAndUpdateJWTIfNeeded = asyncHandler(async (req, res, next) => {
         sameSite: "lax",
         secure: process.env.NODE_ENV === "production",
         path: "/",
-        maxAge: 15 * 60 * 1000,
+        maxAge: 30 * 24 * 60 * 60 * 1000,
       });
       req.userId = user._id;
       next();

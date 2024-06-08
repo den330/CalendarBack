@@ -30,7 +30,7 @@ const loginController = asyncHandler(async (req, res) => {
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 15 * 60 * 1000,
+    maxAge: 30 * 24 * 60 * 60 * 1000,
   });
   res.status(200).json({ message: "User logged in", email: email });
 });
