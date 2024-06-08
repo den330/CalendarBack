@@ -28,6 +28,13 @@ app.use("/signup", signupRoute);
 app.use("/login", loginRoute);
 
 app.use(verifyAndUpdateJWT);
+app.get("/logInStatus", (req, res) => {
+  if (req.userId) {
+    res.status(200).json({ logInStatus: true });
+  } else {
+    res.status(200).json({ logInStatus: false });
+  }
+});
 app.use("/user", userRoute);
 app.use("/calendar", calendarRoute);
 app.use((err, req, res, next) => {

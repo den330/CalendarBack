@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const eventSchema = new mongoose.Schema({
-  name: {
+  title: {
     type: String,
     required: true,
   },
@@ -22,13 +22,13 @@ const eventSchema = new mongoose.Schema({
 
 eventSchema.statics.updateEvent = async function (
   eventId,
-  name,
+  title,
   start,
   description
 ) {
   try {
     await this.findByIdAndUpdate(eventId, {
-      name,
+      title,
       start,
       description,
     });
@@ -39,14 +39,14 @@ eventSchema.statics.updateEvent = async function (
 };
 
 eventSchema.statics.createEvent = async function (
-  name,
+  title,
   creatorId,
   start,
   description
 ) {
   try {
     return await this.create({
-      name,
+      title,
       creatorId,
       start,
       description,

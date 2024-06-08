@@ -13,14 +13,14 @@ const calendarSchema = new mongoose.Schema({
 
 calendarSchema.statics.addEvent = async function (
   calendar_id,
-  name,
+  title,
   creatorId,
   start,
   description
 ) {
   try {
     const event = await this.model("events").createEvent(
-      name,
+      title,
       creatorId,
       start,
       description
@@ -50,12 +50,12 @@ calendarSchema.statics.removeEvent = async function (eventId, calendarId) {
 
 calendarSchema.statics.updateEvent = async function (
   eventId,
-  name,
+  title,
   start,
   description
 ) {
   try {
-    await this.model("events").updateEvent(eventId, name, start, description);
+    await this.model("events").updateEvent(eventId, title, start, description);
   } catch (error) {
     console.log(error);
     throw error;
