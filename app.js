@@ -47,5 +47,5 @@ app.use((err, req, res, next) => {
 
 db.once("open", () => {
   console.log("db connected");
-  app.listen(3000);
+  app.listen(80);
 });
