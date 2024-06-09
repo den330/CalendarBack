@@ -32,7 +32,7 @@ app.use(verifyAndUpdateJWT);
 app.use("/logout", logoutRoute);
 app.get("/logInStatus", (req, res) => {
   if (req.userId) {
-    res.status(200).json({ logInStatus: true });
+    res.status(200).json({ logInStatus: true, userId: req.userId });
   } else {
     res.status(200).json({ logInStatus: false });
   }
