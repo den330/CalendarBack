@@ -4,8 +4,12 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 const loginController = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
-  const user = await UserModel.login(email, password);
+  const { email, password, requirePassword } = req.body;
+  if (!email || (!password && requirePassword)) {
+    res.status(400);
+    throw new Error("Email and password are required");
+  }
+  const user = await UserModel.login(email, password, requirePassword);
   const accessToken = jwt.sign(
     { id: user._id.toString() },
     process.env.ACCESS_TOKEN_SECRET,

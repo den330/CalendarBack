@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
   approvedEmailList: [{ type: String, default: [] }],
   password: {
     type: String,
-    required: true,
+    default: "",
   },
   ownedCalendar: {
     type: mongoose.Schema.Types.ObjectId,
@@ -138,10 +138,14 @@ userSchema.statics.getOwnCalendar = async function (userId) {
   }
 };
 
-userSchema.statics.createUser = async function (email, password) {
+userSchema.statics.createUser = async function (
+  email,
+  password,
+  requirePassword
+) {
   const session = await mongoose.startSession();
   try {
-    if (!email || !password) {
+    if (!email || (!password && requirePassword)) {
       throw new Error("Email and password are required");
     }
     const existingUser = await this.findOne({ email });
@@ -150,7 +154,9 @@ userSchema.statics.createUser = async function (email, password) {
     }
 
     session.startTransaction();
-    const encryptedPassword = await bcrypt.hash(password, 10);
+    const encryptedPassword = requirePassword
+      ? await bcrypt.hash(password, 10)
+      : "";
     const newUserArr = await this.create(
       [{ email: email, password: encryptedPassword }],
       { session: session }
@@ -178,15 +184,18 @@ userSchema.statics.createUser = async function (email, password) {
   }
 };
 
-userSchema.statics.login = async function (email, password) {
+userSchema.statics.login = async function (email, password, requirePassword) {
   try {
     const user = await this.findOne({ email });
     if (!user) {
       throw new Error("User not found");
     }
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
-    if (!isPasswordCorrect) {
-      throw new Error("Password is incorrect");
+
+    if (requirePassword) {
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      if (!isPasswordCorrect) {
+        throw new Error("Password is incorrect");
+      }
     }
     return user;
   } catch (error) {
