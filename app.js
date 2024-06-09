@@ -9,6 +9,7 @@ const signupRoute = require("./Routes/SignUpRoute");
 const loginRoute = require("./Routes/LoginRoute");
 const userRoute = require("./Routes/UserRoute");
 const calendarRoute = require("./Routes/CalendarRoute");
+const logoutRoute = require("./Routes/LogoutRoute");
 const verifyAndUpdateJWT = require("./Middleware/VerifyAndUpdateJWT");
 require("./Models/UserModel");
 require("./Models/CalendarModel");
@@ -28,6 +29,7 @@ app.use("/signup", signupRoute);
 app.use("/login", loginRoute);
 
 app.use(verifyAndUpdateJWT);
+app.use("/logout", logoutRoute);
 app.get("/logInStatus", (req, res) => {
   if (req.userId) {
     res.status(200).json({ logInStatus: true });

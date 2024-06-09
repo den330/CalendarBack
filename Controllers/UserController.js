@@ -10,4 +10,21 @@ const addEmailController = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { addEmailController };
+const removeEmailController = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const userId = req.userId;
+  await UserModel.removeApprovedEmail(userId, email);
+  res.status(200).json({ message: "Email removed" });
+});
+
+const getEmailsController = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+  const user = await UserModel.findById(userId);
+  res.status(200).json({ emails: user.approvedEmailList });
+});
+
+module.exports = {
+  addEmailController,
+  removeEmailController,
+  getEmailsController,
+};
