@@ -138,6 +138,14 @@ userSchema.statics.getOwnCalendar = async function (userId) {
   }
 };
 
+class ErrorWithCode extends Error {
+  constructor(message, code) {
+    super(message);
+    this.name = this.constructor.name;
+    this.code = code;
+  }
+}
+
 userSchema.statics.createUser = async function (
   email,
   password,
@@ -150,7 +158,7 @@ userSchema.statics.createUser = async function (
     }
     const existingUser = await this.findOne({ email });
     if (existingUser) {
-      throw new Error("User already exists");
+      throw new ErrorWithCode("User already exists", 409);
     }
 
     session.startTransaction();
@@ -177,7 +185,9 @@ userSchema.statics.createUser = async function (
     await session.commitTransaction();
     return newUser;
   } catch (error) {
-    await session.abortTransaction();
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
     throw error;
   } finally {
     session.endSession();

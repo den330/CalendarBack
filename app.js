@@ -10,6 +10,7 @@ const loginRoute = require("./Routes/LoginRoute");
 const userRoute = require("./Routes/UserRoute");
 const calendarRoute = require("./Routes/CalendarRoute");
 const logoutRoute = require("./Routes/LogoutRoute");
+const googleAuthRoute = require("./Routes/GoogleAuthRoute");
 const verifyAndUpdateJWT = require("./Middleware/VerifyAndUpdateJWT");
 require("./Models/UserModel");
 require("./Models/CalendarModel");
@@ -27,6 +28,7 @@ app.use(morgan("dev"));
 app.use(cors(corsOptions));
 app.use("/signup", signupRoute);
 app.use("/login", loginRoute);
+app.use("/googleAuth", googleAuthRoute);
 
 app.use(verifyAndUpdateJWT);
 app.use("/logout", logoutRoute);

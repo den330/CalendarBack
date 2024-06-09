@@ -5,10 +5,10 @@ const bcrypt = require("bcrypt");
 
 const loginController = asyncHandler(async (req, res) => {
   const { email, password, requirePassword } = req.body;
-  if (!email || (!password && requirePassword)) {
-    res.status(400);
-    throw new Error("Email and password are required");
-  }
+  loginFlow(email, password, requirePassword, req, res);
+});
+
+async function loginFlow(email, password, requirePassword, req, res) {
   const user = await UserModel.login(email, password, requirePassword);
   const accessToken = jwt.sign(
     { id: user._id.toString() },
@@ -39,6 +39,6 @@ const loginController = asyncHandler(async (req, res) => {
   res
     .status(200)
     .json({ message: "User logged in", email: email, userId: user._id });
-});
+}
 
-module.exports = loginController;
+module.exports = { loginController, loginFlow };
