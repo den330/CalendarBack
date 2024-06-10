@@ -24,7 +24,6 @@ const getEvents = asyncHandler(async (req, res) => {
 
 const addEvent = asyncHandler(async (req, res) => {
   const { calendar_id, title, start, description, _id } = req.body;
-  console.log(`event id is ${_id}`);
   const creatorId = req.userId;
   await CalendarModel.addEvent(
     _id,

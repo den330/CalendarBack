@@ -37,7 +37,6 @@ eventSchema.statics.updateEvent = async function (
       description,
     });
   } catch (error) {
-    console.error("Error updating an event:", error);
     throw error;
   }
 };
@@ -58,7 +57,6 @@ eventSchema.statics.createEvent = async function (
       description,
     });
   } catch (error) {
-    console.error("Error creating an event:", error);
     throw error;
   }
 };
@@ -67,7 +65,6 @@ eventSchema.statics.getEventById = async function (eventId) {
   try {
     return await this.findById(eventId);
   } catch (error) {
-    console.error("Error getting an event:", error);
     throw error;
   }
 };
@@ -76,7 +73,6 @@ eventSchema.statics.deleteEventById = async function (eventId) {
   try {
     await this.findByIdAndDelete(eventId);
   } catch (error) {
-    console.error("Error deleting an event:", error);
     throw error;
   }
 };
