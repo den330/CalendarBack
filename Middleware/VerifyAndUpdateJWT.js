@@ -49,14 +49,14 @@ const verifyAndUpdateJWTIfNeeded = asyncHandler(async (req, res, next) => {
       console.log(`it reaches here 5`);
       res.cookie("refreshToken", newRefreshToken, {
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "none",
         secure: process.env.NODE_ENV === "production",
         path: "/",
         maxAge: 30 * 24 * 60 * 60 * 1000,
       });
       res.cookie("accessToken", newAccessToken, {
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "none",
         secure: process.env.NODE_ENV === "production",
         path: "/",
         maxAge: 30 * 24 * 60 * 60 * 1000,
