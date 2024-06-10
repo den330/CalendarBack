@@ -13,6 +13,7 @@ const verifyAndUpdateJWTIfNeeded = asyncHandler(async (req, res, next) => {
   try {
     const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
     req.userId = decoded.id;
+    console.log(`it reaches here 1`);
     next();
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
@@ -20,15 +21,19 @@ const verifyAndUpdateJWTIfNeeded = asyncHandler(async (req, res, next) => {
         refreshToken,
         process.env.REFRESH_TOKEN_SECRET
       );
+
       const user = await userModel.findMatchingRefreshToken(refreshToken);
+      console.log(`it reaches here 2`);
       if (!user) {
         res.status(401);
         throw new Error("User not found");
       }
+      console.log(`it reaches here 3`);
       if (user._id.toString() !== decodedRefreshToken.id) {
         res.status(401);
         throw new Error("Refresh token payload does not match");
       }
+      console.log(`it reaches here 4`);
       const newAccessToken = jwt.sign(
         { id: user._id.toString() },
         process.env.ACCESS_TOKEN_SECRET,
@@ -41,6 +46,7 @@ const verifyAndUpdateJWTIfNeeded = asyncHandler(async (req, res, next) => {
       );
       user.refreshToken = newRefreshToken;
       await user.save();
+      console.log(`it reaches here 5`);
       res.cookie("refreshToken", newRefreshToken, {
         httpOnly: true,
         sameSite: "lax",
@@ -55,6 +61,7 @@ const verifyAndUpdateJWTIfNeeded = asyncHandler(async (req, res, next) => {
         path: "/",
         maxAge: 30 * 24 * 60 * 60 * 1000,
       });
+      console.log(`it reaches here 6`);
       req.userId = user._id;
       next();
     } else {
