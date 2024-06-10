@@ -15,7 +15,6 @@ const googleAuthFlowController = asyncHandler(async (req, res) => {
     if (e.code === 409) {
       loginFlow(email, "", false, req, res);
     } else {
-      console.error(e);
       throw e;
     }
   }

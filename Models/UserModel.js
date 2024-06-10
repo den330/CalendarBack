@@ -41,7 +41,6 @@ userSchema.statics.addOwnedCalendar = async function (userId, session) {
       { session: session }
     );
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -52,7 +51,6 @@ userSchema.statics.addAccessibleCalendar = async function (userId, calendarId) {
       $push: { accessibleCalendars: calendarId },
     });
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -66,7 +64,6 @@ userSchema.statics.removeAccessibleCalendar = async function (
       $pull: { accessibleCalendars: calendarId },
     });
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -88,7 +85,6 @@ userSchema.statics.addApprovedEmail = async function (userId, email) {
       { $push: { accessibleCalendars: calendarId } }
     );
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -106,7 +102,6 @@ userSchema.statics.removeApprovedEmail = async function (userId, email) {
       { $pull: { accessibleCalendars: calendarId } }
     );
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -123,7 +118,6 @@ userSchema.statics.getAllAccessibleCalendars = async function (userId) {
     }
     return calendars;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -133,7 +127,6 @@ userSchema.statics.getOwnCalendar = async function (userId) {
     const user = await this.findById(userId);
     return await this.model("calendars").getCalendarById(user.ownedCalendar);
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -209,7 +202,6 @@ userSchema.statics.login = async function (email, password, requirePassword) {
     }
     return user;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -218,7 +210,6 @@ userSchema.statics.findMatchingRefreshToken = async function (refreshToken) {
   try {
     return await this.findOne({ refreshToken });
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -227,7 +218,6 @@ userSchema.statics.getUserById = async function (userId) {
   try {
     return await this.findById(userId);
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };

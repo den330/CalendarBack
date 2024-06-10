@@ -33,7 +33,6 @@ calendarSchema.statics.addEvent = async function (
     calendar.events.push(event._id);
     await calendar.save();
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -47,7 +46,6 @@ calendarSchema.statics.removeEvent = async function (eventId, calendarId) {
     );
     await calendar.save();
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -61,7 +59,6 @@ calendarSchema.statics.updateEvent = async function (
   try {
     await this.model("events").updateEvent(eventId, title, start, description);
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -75,7 +72,6 @@ calendarSchema.statics.removeAllEvents = async function (calendarId) {
     calendar.events = [];
     await calendar.save();
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -86,7 +82,6 @@ calendarSchema.statics.createCalendar = async function (name) {
       name,
     });
   } catch (error) {
-    console.error("Error creating a calendar:", error);
     throw error;
   }
 };
@@ -95,7 +90,6 @@ calendarSchema.statics.getCalendarById = async function (calendarId) {
   try {
     return await this.findById(calendarId);
   } catch (error) {
-    console.error("Error getting a calendar:", error);
     throw error;
   }
 };
@@ -110,7 +104,6 @@ calendarSchema.statics.getEvents = async function (calendarId) {
     }
     return events;
   } catch {
-    console.error("Error getting events:", error);
     throw error;
   }
 };
