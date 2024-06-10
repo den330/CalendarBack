@@ -47,7 +47,7 @@ app.use((err, req, res, next) => {
 
 db.once("open", () => {
   console.log("db connected");
-  const port = process.env.PORT;
+  const port = process.env.PORT || 8080;
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
