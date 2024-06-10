@@ -5,6 +5,7 @@ const userModel = require("../Models/UserModel");
 const verifyAndUpdateJWTIfNeeded = asyncHandler(async (req, res, next) => {
   const accessToken = req.cookies.accessToken;
   const refreshToken = req.cookies.refreshToken;
+  console.log(`it reaches verifyAndUpdateJWTIfNeeded with url: ${req.url}`);
   if (!accessToken || !refreshToken) {
     res.status(401);
     throw new Error("Both tokens are required");
