@@ -24,14 +24,14 @@ async function loginFlow(email, password, requirePassword, req, res) {
   await user.save();
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    sameSite: "none",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: 30 * 24 * 60 * 60 * 1000,
   });
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
-    sameSite: "none",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: 30 * 24 * 60 * 60 * 1000,
