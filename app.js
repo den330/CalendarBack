@@ -4,6 +4,8 @@ const cors = require("cors");
 const corsOptions = require("./Configs/CorsOptions");
 const express = require("express");
 const morgan = require("morgan");
+const http = require("http");
+const socketIO = require("socket.io");
 const cookieParser = require("cookie-parser");
 const signupRoute = require("./Routes/SignUpRoute");
 const loginRoute = require("./Routes/LoginRoute");
@@ -20,8 +22,8 @@ mongoose.connect(`${process.env.dbUrl}`);
 const db = mongoose.connection;
 
 const app = express();
-
-app.use(express.json());
+const server = http.createServer(app);
+const io = socketIO(server);
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan("dev"));
@@ -45,7 +47,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: err.message });
 });
 
+io.on("connection", (socket) => {
+  socket.emit("connection", "Connected to server");
+});
+
 db.once("open", () => {
   const port = process.env.PORT || 8080;
-  app.listen(port);
+  server.listen(port);
 });
