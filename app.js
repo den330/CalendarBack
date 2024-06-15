@@ -17,6 +17,7 @@ const verifyAndUpdateJWT = require("./Middleware/VerifyAndUpdateJWT");
 require("./Models/UserModel");
 require("./Models/CalendarModel");
 require("./Models/EventModel");
+const AboutModel = require("./Models/AboutModel");
 
 mongoose.connect(`${process.env.dbUrl}`);
 const db = mongoose.connection;
@@ -31,6 +32,14 @@ app.use(cors(corsOptions));
 app.use("/signup", signupRoute);
 app.use("/login", loginRoute);
 app.use("/googleAuth", googleAuthRoute);
+app.get("/about", async (req, res, next) => {
+  try {
+    const message = await AboutModel.getCurrentMessage();
+    res.status(200).json({ message: message });
+  } catch (error) {
+    next(error);
+  }
+});
 
 app.use(verifyAndUpdateJWT);
 app.use("/logout", logoutRoute);
@@ -48,7 +57,28 @@ app.use((err, req, res, next) => {
 });
 
 io.on("connection", (socket) => {
-  socket.emit("connection", "Connected to server");
+  const changeStream = AboutModel.watch([
+    {
+      $match: { "updateDescription.updatedFields.message": { $exists: true } },
+    },
+  ]);
+
+  changeStream.on("change", (change) => {
+    const newMessage = change.updateDescription.updatedFields.message;
+    socket.emit("messageUpdated", { message: newMessage });
+  });
+
+  changeStream.on("error", (error) => {
+    console.error("Error in change stream:", error);
+  });
+
+  socket.on("connection", () => {
+    console.log("Connected to socket");
+  });
+
+  socket.on("disconnect", () => {
+    changeStream.close();
+  });
 });
 
 db.once("open", () => {
