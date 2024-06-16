@@ -18,13 +18,13 @@ require("./Models/UserModel");
 require("./Models/CalendarModel");
 require("./Models/EventModel");
 const AboutModel = require("./Models/AboutModel");
-
-mongoose.connect(`${process.env.dbUrl}`);
-const db = mongoose.connection;
-
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
+
+mongoose.connect(`${process.env.dbUrl}`);
+const db = mongoose.connection;
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan("dev"));
@@ -84,4 +84,8 @@ io.on("connection", (socket) => {
 db.once("open", () => {
   const port = process.env.PORT || 8080;
   server.listen(port);
+});
+
+db.on("error", (error) => {
+  console.error("Error in connection:", error);
 });
